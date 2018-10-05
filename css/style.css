@@ -21,8 +21,48 @@ body {
     background-color: #F5F5F5;
 }
 
-button, strong {
+strong {
     text-transform: uppercase;
+}
+
+button {
+    height: 36px;
+    min-width: 64px;
+    font-size: 14px;
+    border-radius: 4px;
+    padding: 0px 16px;
+    margin: 8px;
+    background-color: white;
+    border: none;
+    color: black;
+    text-transform: uppercase;
+    position: relative;
+}
+
+button.primary {
+    background-color: #3F51B5;
+    color: white;
+}
+
+button.accent {
+    background-color: #CDDC39;
+    color: black;
+}
+
+button::before {
+    background-color: black;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    min-width: 100%;
+    min-height: 100%;
+    border-radius: inherit;
+    border: none;
+}
+
+button:hover::before {
+    opacity: 0.15;
+    content: "";
 }
 
 /* LAYOUT */
@@ -83,12 +123,24 @@ h1 a {
     color: white;
 }
 
-h1 i {
+h1 button {
     /* #7 #icns #str  */
     position:absolute;
     right: 16px;
+    top: 6px;
     /* #7 #icns #small adjust icon size */
     font-size:24px;
+}
+
+h1 input {
+    height: 30px;
+    width: calc(100% - 200px);
+    padding: 2px;
+    font-size: 24px;
+    position: absolute;
+    top: 15px;
+    border: none;
+    border-radius: 2px;
 }
 
 /* CHANNELS LIST */
@@ -157,16 +209,20 @@ li.selected {
     position: absolute;
     bottom: 0;
     width: 100%;
+    height: 72px;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-#tab-bar button, #chat-bar button {
-    background-color: white;
-    border: none;
+#tab-bar button {
+    align-self: center;
     font-size: 13px;
     width: 33%;
-    height: 72px;
+    min-height: 100%;
     padding: 16px;
+    margin: 0px;
+    border-radius: 0px;
 
     /* flexify the buttons by growing them equally */
     flex-grow: 1;
@@ -193,13 +249,16 @@ li.selected {
 
     /* #7 #icns #smile adjust fa size */
     font-size: 24px;
+    padding: 2px 16px;
+    height: 36px;
+    margin: 8px;
 }
 
 #emojis {
     /* emoji menu */
     /* colors and borders */
     background-color:white;
-    border: 1px solid black;
+    border: none;
 
     /* size & alignment */
     position: absolute;
@@ -235,7 +294,7 @@ li.selected {
 .message {
     width: 80%;
     margin-bottom: 8px;
-    margin-left: 2.5%;
+    margin-left: 20px;
     position: relative;
 }
 
@@ -268,20 +327,111 @@ li.selected {
 .message p {
     background-color: white;
     padding: 16px;
+    z-index: 1;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                0 3px 1px -2px rgba(0, 0, 0, 0.2),
+                0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    position: relative;
 }
 
 .message button {
     /* +5 min. button*/
-    background-color: #CDDC39;
+    /* background-color: #CDDC39;
     color: black;
-    text-transform: uppercase;
+    text-transform: uppercase; */
 
     /* right/bottom alignment of button */
     position: absolute;
     right: 8px;
     bottom: 8px;
+    margin: 0px;
+    z-index: 3;
 }
 
 .message.own {
-    margin-left: 17.5%;
+    margin-left: calc(20% - 20px);
+}
+
+/* Shadow classes for elevating taken from
+https://stackoverflow.com/questions/30533055/calculating-shadow-values-for-all-material-design-elevations*/
+.shadow--2dp {
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                0 3px 1px -2px rgba(0, 0, 0, 0.2),
+                0 1px 5px 0 rgba(0, 0, 0, 0.12);
+}
+
+.shadow--24dp {
+    box-shadow: 0 9px 46px 8px rgba(0, 0, 0, 0.14),
+                0 11px 15px -7px rgba(0, 0, 0, 0.12),
+                0 24px 38px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Evelation level classes */
+.lvl-0 {
+    z-index: 0;
+}
+.lvl-1 {
+    z-index: 1;
+}
+.lvl-2 {
+    z-index: 2;
+}
+.lvl-3 {
+    z-index: 3;
+}
+.lvl-4 {
+    z-index: 4;
+}
+.lvl-5 {
+    z-index: 5;
+}
+
+/* styling message paragraphs */
+.message p::before {
+    position: absolute;
+    left: -19px;
+    top: 0px;
+    content: "";
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-top: 20px solid white;
+}
+
+.message.own p::before {
+    left: initial;
+    right: -19px;
+    border-right: 20px solid transparent;
+    border-left: none;
+}
+
+#floatingButton {
+    position: absolute;
+    right: 0px;
+    bottom: 72px;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    font-size: 50px;
+    margin: 0px 16px 16px 0px;
+    font-weight: bold;
+}
+
+.triangle-with-shadow {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 16px 10px -17px rgba(0, 0, 0, 0.5);
+}
+.triangle-with-shadow:after {
+    content: "";
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: #999;
+    transform: rotate(45deg);
+    top: 75px;
+    left: 25px;
+    box-shadow: -1px -1px 10px -2px rgba(0, 0, 0, 0.5);
 }

@@ -20,7 +20,10 @@ var currentLocation = {
  * Switch channels name in the right app bar
  * @param channelObject
  */
-function switchChannel(channelObject) {
+function switchChannel(channelName) {
+    //getting channel object from container
+    var channelObject = channels.find(x => x.name === channelName);
+
     //Log the channel switch
     console.log("Tuning in to channel", channelObject);
 
@@ -61,8 +64,8 @@ function star() {
     currentChannel.starred = !currentChannel.starred;
 
     // #7 toggle star also in list
-    $('#channels li:contains(' + currentChannel.name + ') .fa').removeClass('fas far');
-    $('#channels li:contains(' + currentChannel.name + ') .fa').addClass(currentChannel.starred ? 'fas' : 'far');
+    $('#channels li:contains(' + currentChannel.name + ') .fa-star').removeClass('fas far');
+    $('#channels li:contains(' + currentChannel.name + ') .fa-star').addClass(currentChannel.starred ? 'fas' : 'far');
 }
 
 /**
@@ -73,6 +76,7 @@ function selectTab(tabId) {
     $('#tab-bar button').removeClass('selected');
     console.log('Changing to tab', tabId);
     $(tabId).addClass('selected');
+    listChannels();
 }
 
 /**
@@ -110,14 +114,20 @@ function sendMessage() {
     console.log("New message:", message);
 
     // #8 convenient message append with jQuery:
-    $('#messages').append(createMessageElement(message));
-
-    // #8 messages will scroll to a certain point if we apply a certain height, in this case the overall scrollHeight of the messages-div that increases with every message;
-    // it would also scroll to the bottom when using a very high number (e.g. 1000000000);
-    $('#messages').scrollTop($('#messages').prop('scrollHeight'));
-
-    // #8 clear the message input
-    $('#message').val('');
+    if (message.text === '') {
+        console.log('empty message was tried to send');
+    } else {
+        $('#messages').append(createMessageElement(message));
+        // #8 messages will scroll to a certain point if we apply a certain height, in this case the overall scrollHeight of the messages-div that increases with every message;
+        // it would also scroll to the bottom when using a very high number (e.g. 1000000000);
+        $('#messages').scrollTop($('#messages').prop('scrollHeight'));
+        // #8 clear the message input
+        $('#message').val('');
+        // adding message to channel object
+        currentChannel.messages.push(message);
+        // increasing message count by one
+        currentChannel.messageCount++;
+    }
 }
 
 /**
@@ -140,7 +150,7 @@ function createMessageElement(messageObject) {
         messageObject.createdOn.toLocaleString() +
         '<em>' + expiresIn+ ' min. left</em></h3>' +
         '<p>' + messageObject.text + '</p>' +
-        '<button>+5 min.</button>' +
+        '<button class="accent">+5 min.</button>' +
         '</div>';
 }
 
@@ -148,13 +158,29 @@ function createMessageElement(messageObject) {
 function listChannels() {
     // #8 channel onload
     //$('#channels ul').append("<li>New Channel</li>")
+    // sorting channels
+    $('#tab-bar button.selected').attr('id');
+    switch($('#tab-bar button.selected').attr('id')) {
+        case 'tab-new':
+            channels.sort(compareNew);
+            break;
+        case 'tab-trending':
+        channels.sort(compareTrending);
+            break;
+        case 'tab-favorites':
+        channels.sort(compareFavorits);
+            break;
+        default:
+            console.log('switch case didn\'t work');
+    }
+    // empty the ul
+    $('#channels ul').empty();
 
     // #8 five new channels
-    $('#channels ul').append(createChannelElement(yummy));
-    $('#channels ul').append(createChannelElement(sevencontinents));
-    $('#channels ul').append(createChannelElement(killerapp));
-    $('#channels ul').append(createChannelElement(firstpersononmars));
-    $('#channels ul').append(createChannelElement(octoberfest));
+    channels.forEach(function(element) {
+        $('#channels ul').append(createChannelElement(element));
+    });
+    switchChannel(currentChannel.name);
 }
 
 /**
@@ -174,7 +200,7 @@ function createChannelElement(channelObject) {
      */
 
     // create a channel
-    var channel = $('<li>').text(channelObject.name);
+    var channel = $('<li>').text(channelObject.name). attr('onclick','switchChannel("' + channelObject.name + '")');
 
     // create and append channel meta
     var meta = $('<span>').addClass('channel-meta').appendTo(channel);
@@ -192,4 +218,74 @@ function createChannelElement(channelObject) {
 
     // return the complete channel
     return channel;
+}
+
+function compareNew(channelA, channelB) {
+    return (channelB.createdOn.getTime() - channelA.createdOn.getTime());
+}
+function compareTrending(channelA, channelB) {
+    return (channelB.messageCount - channelA.messageCount);
+}
+function compareFavorits(channelA, channelB) {
+    return (channelB.starred.valueOf() - channelA.starred.valueOf());
+}
+
+function newChannel() {
+    $('#chat h1').toggle();
+    $('#chat').append($('<h1>').html(
+        $('<input>').attr({type: 'text',
+                           placeholder: 'Enter a #ChannelName',
+                           id: 'input-channel-name'    
+                        })
+                        ).append(
+                            $('<button>').html('<i class="fas fa-times"></i> abort')
+                                         .attr({class: 'primary', onclick: 'abortNewChannel()'})
+    ));
+    $('#chat-bar button.accent').html('create').attr('onclick', 'createNewChannel()');
+    $('#messages').empty();
+}
+
+function createNewChannel() {
+    if ($('#message').val() === '') {
+        alert('No message was typed in! Please type something.')
+    } else if ($('#input-channel-name').val() === '') {
+        alert('No channel name was typed in! Please insert one.')
+    } else {
+        var newChannel = {
+            name: '#' + $('#input-channel-name').val(),
+            createdOn: new Date(),
+            createdBy: 'shelf.jetted.purple',
+            starred: false,
+            expiresIn: 1000,
+            messageCount: 0,
+            messages: []
+        };
+        $('#chat h1:last').remove();
+        $('#chat h1').toggle();
+        $('#chat-bar button.accent').html('<i class="fas fa-arrow-right"></i>')
+                                    .attr('onclick', 'sendMessage()');
+        channels.push(newChannel);
+        currentChannel = newChannel;
+        listChannels();
+        sendMessage(); 
+    }
+      
+}
+
+function abortNewChannel() {
+    $('#chat h1:last').remove();
+    $('#chat h1').toggle();
+    $('#chat-bar button.accent').html('<i class="fas fa-arrow-right"></i>')
+                                .attr('onclick', 'sendMessage()');
+    switchChannel(currentChannel.name);
+}
+
+function loadEmojis() {
+    // insert all emojis to the emoji div
+    var emojis = require('emojis-list');
+    emojis.forEach(function(element) {
+        var emojiString = $('#emojis').text();
+        emojiString += element;
+        $('#emojis').text(emojiString);
+    });
 }
