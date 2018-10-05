@@ -243,6 +243,7 @@ function newChannel() {
     ));
     $('#chat-bar button.accent').html('create').attr('onclick', 'createNewChannel()');
     $('#messages').empty();
+    $('#message').val('')
 }
 
 function createNewChannel() {
@@ -278,6 +279,7 @@ function abortNewChannel() {
     $('#chat-bar button.accent').html('<i class="fas fa-arrow-right"></i>')
                                 .attr('onclick', 'sendMessage()');
     switchChannel(currentChannel.name);
+    $('#message').val('')
 }
 
 function loadEmojis() {
